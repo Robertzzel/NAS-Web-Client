@@ -17,12 +17,22 @@ export class HomeComponent {
     this.refreshFiles()
   }
 
-  remove(dir: string) {
-
+  remove(file: string) {
+    this.backend.removeFile(this.currentPath + file).subscribe((res) => {
+      this.refreshFiles()
+    })
   }
 
-  download(dir: string) {
+  downloadAttachment(file: string) {
+    console.log(file)
+    const url = this.backend.getLinkDownloadAttachmentFile(this.currentPath + file)
+    window.open(url, '_blank');
+  }
 
+  downloadInline(file: string) {
+    console.log(file)
+    const url = this.backend.getLinkDownloadInlineFile(this.currentPath + file)
+    window.open(url, '_blank');
   }
 
   cdup() {

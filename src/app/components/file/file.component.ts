@@ -10,7 +10,8 @@ export class FileComponent {
   @Input() details: File = new File;
   @Output() cdEvent = new EventEmitter<string>();
   @Output() removeEvent = new EventEmitter<string>();
-  @Output() downloadEvent = new EventEmitter<string>();
+  @Output() downloadAttachmentEvent = new EventEmitter<string>();
+  @Output() downloadInlineEvent = new EventEmitter<string>();
 
   cd(value: string) {
     this.cdEvent.emit(value);
@@ -20,7 +21,11 @@ export class FileComponent {
     this.removeEvent.emit(value);
   }
 
-  download(value: string) {
-    this.downloadEvent.emit(value);
+  downloadAttachment(value: string) {
+    this.downloadAttachmentEvent.emit(value);
+  }
+
+  downloadInline(value: string) {
+    this.downloadInlineEvent.emit(value);
   }
 }

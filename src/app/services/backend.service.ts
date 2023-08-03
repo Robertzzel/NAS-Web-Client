@@ -18,7 +18,15 @@ export class BackendService {
     return this.httpClient.post<any>(this.baseUrl + "login", body, { withCredentials: true, observe: 'response' })
   }
 
-  getCwd() {
-    return this.httpClient.get<any>(this.baseUrl + "cwd", { withCredentials: true, observe: 'response' })
+  removeFile(path: string) {
+    return this.httpClient.post<any>(this.baseUrl + "rm", {'path':path}, { withCredentials: true, observe: 'response' })
+  }
+
+  getLinkDownloadAttachmentFile(path: string) {
+    return `${this.baseUrl}dwat/${path}`
+  }
+
+  getLinkDownloadInlineFile(path: string) {
+    return `${this.baseUrl}dwin/${path}`
   }
 }
