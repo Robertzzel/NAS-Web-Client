@@ -1,0 +1,19 @@
+.card-title {
+    font-weight: normal;
+    font-size: small;
+    margin: 0 1rem 0 0 !important;
+    white-space: nowrap; /* Prevents text from wrapping */
+    overflow: hidden; /* Hides any overflowing content */
+    text-overflow: ellipsis; /* Adds an ellipsis (...) at the end of the visible text */
+}
+
+.menu-dropdown img{
+    width: 1rem !important;
+    height: 1rem !important;
+    padding: 0 !important;
+}
+
+.card-img-top {
+    width: 6rem !important;
+    height: 7rem !important;
+}
