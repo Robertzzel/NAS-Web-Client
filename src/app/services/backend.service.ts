@@ -29,4 +29,8 @@ export class BackendService {
   getLinkDownloadInlineFile(path: string) {
     return `${this.baseUrl}dwin/${path}`
   }
+
+  getLinkDownloadDirectory(path: string) {
+    return `${this.baseUrl}dwdr/${path}`
+  }
 }

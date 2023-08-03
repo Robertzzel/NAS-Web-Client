@@ -44,8 +44,9 @@
       <div class="row justify-content-around" id="files-card-view">
           <app-file (cdEvent)="cd($event)" class="card card-file d-flex flex-column align-items-center mb-4"
             *ngFor="let file of displayedFiles" (removeEvent)="remove($event)"
-            (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadAttachment($event)" [details]="file">
-
+            (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadAttachment($event)" [details]="file"
+            (downloadDirectoryEvent)="downloadDirectory($event)">
+            
           </app-file>
       </div>
     </div>
