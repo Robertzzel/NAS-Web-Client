@@ -33,4 +33,8 @@ export class BackendService {
   getLinkDownloadDirectory(path: string) {
     return `${this.baseUrl}dwdr/${path}`
   }
+
+  getLinkForUploadFile() {
+    return `${this.baseUrl}upload`
+  }
 }

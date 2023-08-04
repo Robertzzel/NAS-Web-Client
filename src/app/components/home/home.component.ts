@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, IterableDiffers } from '@angular/core';
 import { BackendService } from 'src/app/services/backend.service';
 import { File } from 'src/app/models/files';
+import { FileUploader, FileItem } from 'ng2-file-upload';
+import { ModalTypes } from 'src/app/models/modals';
 
 @Component({
   selector: 'app-home',
@@ -12,9 +14,20 @@ export class HomeComponent {
   displayedFiles: File[] = []
   filter: string = ""
   currentPath: string = "/"
+  selectedModal: ModalTypes = ModalTypes.AddFiles
+  uploader: FileUploader
 
   constructor(private backend: BackendService) {
     this.refreshFiles()
+
+    this.uploader = new FileUploader({
+      url: this.backend.getLinkForUploadFile(),
+      parametersBeforeFiles: true,
+    });
+
+    this.uploader.onBuildItemForm = (fileItem: FileItem, form: any) => {
+      form.append('filename', `${this.currentPath}${fileItem._file.name}`);
+    };
   }
 
   remove(file: string) {
@@ -73,5 +86,17 @@ export class HomeComponent {
       return
     }
     this.displayedFiles = this.files.filter((v) => v.Name.toLowerCase().includes(this.filter.toLowerCase()))
+  }
+
+  onFilesAdd() {
+    this.selectedModal = ModalTypes.AddFiles
+  }
+
+  onFileChange(event: any) {
+    console.log("on file change")
+  }
+
+  uploadFiles() {
+    console.log("upload files")
   }
 }

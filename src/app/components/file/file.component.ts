@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { File } from 'src/app/models/files';
 
+
 @Component({
   selector: 'app-file',
   templateUrl: './file.component.html',
