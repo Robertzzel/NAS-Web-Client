@@ -27,7 +27,7 @@
             </button>
           </li>
           <li>
-            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button (click)="onDirectoryCreate()" type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
               Create directory
             </button>
           </li>
@@ -55,14 +55,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div [ngSwitch]="true">
-          <div *ngSwitchCase="true">
+        <div [ngSwitch]="selectedModal">
+          <div *ngSwitchCase="ModalTypes.AddFiles">
             <h3>Select files to upload</h3>
             <input type="file" ng2FileSelect [uploader]="uploader" multiple  /><br/>
             <button type="button" class="btn btn-success btn-s"
                     (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
                 <span class="glyphicon glyphicon-upload"></span> Upload all
             </button>  
+          </div>
+          <div *ngSwitchCase="ModalTypes.Rename">
+            <input type="text" [(ngModel)]="directoryNameToCreate" placeholder="Directory Name"/><br/>
+            <button class="btn" (click)="createDir()">Create</button> 
           </div>
         </div>
       </div>

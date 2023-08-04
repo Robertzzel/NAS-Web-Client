@@ -22,6 +22,10 @@ export class BackendService {
     return this.httpClient.post<any>(this.baseUrl + "rm", {'path':path}, { withCredentials: true, observe: 'response' })
   }
 
+  createDirectory(path: string) {
+    return this.httpClient.post<any>(this.baseUrl + "directory", {'path':path}, { withCredentials: true, observe: 'response' })
+  }
+
   getLinkDownloadAttachmentFile(path: string) {
     return `${this.baseUrl}dwat/${path}`
   }

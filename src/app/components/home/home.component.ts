@@ -16,6 +16,7 @@ export class HomeComponent {
   currentPath: string = "/"
   selectedModal: ModalTypes = ModalTypes.AddFiles
   uploader: FileUploader
+  directoryNameToCreate: string = "sal"
 
   constructor(private backend: BackendService) {
     this.refreshFiles()
@@ -28,6 +29,14 @@ export class HomeComponent {
     this.uploader.onBuildItemForm = (fileItem: FileItem, form: any) => {
       form.append('filename', `${this.currentPath}${fileItem._file.name}`);
     };
+
+    this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
+      this.refreshFiles()
+    };
+  }
+
+  public get ModalTypes() {
+    return ModalTypes; 
   }
 
   remove(file: string) {
@@ -92,11 +101,15 @@ export class HomeComponent {
     this.selectedModal = ModalTypes.AddFiles
   }
 
-  onFileChange(event: any) {
-    console.log("on file change")
+  onDirectoryCreate() {
+    this.directoryNameToCreate = "sal"
+    this.selectedModal = ModalTypes.Rename
   }
 
-  uploadFiles() {
-    console.log("upload files")
+  createDir() {
+    console.log("creating", this.currentPath + this.directoryNameToCreate)
+    this.backend.createDirectory(this.currentPath + this.directoryNameToCreate).subscribe(res => {
+      this.refreshFiles()
+    })
   }
 }
