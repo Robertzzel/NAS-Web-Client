@@ -17,6 +17,7 @@ export class HomeComponent {
   selectedModal: ModalTypes = ModalTypes.AddFiles
   uploader: FileUploader
   directoryNameToCreate: string = "sal"
+  sortingMethod: string = "time-newest"
 
   constructor(private backend: BackendService) {
     this.refreshFiles()
@@ -95,6 +96,7 @@ export class HomeComponent {
       return
     }
     this.displayedFiles = this.files.filter((v) => v.Name.toLowerCase().includes(this.filter.toLowerCase()))
+    this.sortFiles()
   }
 
   onFilesAdd() {
@@ -111,5 +113,44 @@ export class HomeComponent {
     this.backend.createDirectory(this.currentPath + this.directoryNameToCreate).subscribe(res => {
       this.refreshFiles()
     })
+  }
+
+  sortFiles() {
+    console.log(this.sortingMethod)
+    switch(this.sortingMethod) {
+      case "name-asc":
+        this.displayedFiles.sort(function (a, b) {
+          if (a.Name < b.Name) {
+            return -1;
+          }
+          if (a.Name > b.Name) {
+            return 1;
+          }
+          return 0;
+        });
+        break
+      case "name-desc":
+        this.displayedFiles.sort(function (a, b) {
+          if (a.Name < b.Name) {
+            return 1;
+          }
+          if (a.Name > b.Name) {
+            return -1;
+          }
+          return 0;
+        });
+        break
+      case "time-newest":
+        this.displayedFiles.sort((a, b) => b.CreatingTime - a.CreatingTime);
+        console.log(this.displayedFiles.map(v=>v.CreatingTime))
+        break
+      case "time-oldest":
+        this.displayedFiles.sort((a, b) => a.CreatingTime - b.CreatingTime);
+        console.log(this.displayedFiles.map(v=>v.CreatingTime))
+        break
+      default:
+        this.displayedFiles.sort((a, b) => b.CreatingTime - a.CreatingTime);
+        break;
+    }
   }
 }

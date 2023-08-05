@@ -4,10 +4,10 @@
     <input type="image" src="../../../assets/directory.png" class="card-img-top" alt="diretory" (click)="cd(details.Name)">
   </div>
   <img *ngSwitchCase="details.Type.includes('zip') || details.Type.includes('compressed')" src="../../../assets/zip.png" class="card-img-top" alt="file">
-  <img *ngSwitchCase="details.Type.includes('pdf')" src="../../../assets/pdf.png" class="card-img-top" alt="file">
+  <img *ngSwitchCase="details.Type.includes('pdf')" (click)="downloadInline(details.Name)" src="../../../assets/pdf.png" class="card-img-top" alt="file">
   <img *ngSwitchCase="details.Type.includes('html')" src="../../../assets/html.png" class="card-img-top" alt="file">
   <img *ngSwitchCase="details.Type.includes('xml')" src="../../../assets/xml.png" class="card-img-top" alt="file">
-  <img (click)="downloadInline(details.Name)" *ngSwitchCase="details.Type.includes('image') && details.ImageData !== null" src="data:image/jpeg;base64,{{details.ImageData}}" class="card-img-top" alt="file">
+  <img *ngSwitchCase="details.Type.includes('image') && details.ImageData !== null" (click)="downloadInline(details.Name)" src="data:image/jpeg;base64,{{details.ImageData}}" class="card-img-top" alt="file">
   <img *ngSwitchCase="details.Type.includes('image') && details.ImageData === null" src="../../../assets/image.png" class="card-img-top" alt="file">
   <img *ngSwitchDefault src="../../../assets/file.png" class="card-img-top" alt="file">
 

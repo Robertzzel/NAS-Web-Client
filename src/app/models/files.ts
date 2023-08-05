@@ -3,5 +3,6 @@ export class File {
     Size: number = 0
     IsDir: boolean = false
     Type: string = ""
-    ImageData: string = "" 
+    ImageData: string = ""
+    CreatingTime: number = 0 
 }

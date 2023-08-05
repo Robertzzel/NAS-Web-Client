@@ -9,6 +9,7 @@ import { LoginComponent } from './components/login/login.component';
 import { FormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
 import { FileUploadModule } from 'ng2-file-upload';
+import { MdbCheckboxModule } from 'mdb-angular-ui-kit/checkbox';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { FileUploadModule } from 'ng2-file-upload';
     AppRoutingModule,
     FormsModule,
     FileUploadModule,
+    MdbCheckboxModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

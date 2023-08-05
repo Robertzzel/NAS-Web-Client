@@ -15,7 +15,13 @@
       <div class="d-flex flex-row" id="search-bar">
         <input type="text" placeholder="Search..." class="w-75 h-100 p-2" name="filter" [(ngModel)]="filter" (input)="displayFiles()">
         <div class="w-25 h-100 d-flex justify-content-center">
-          <input type="image" id="search-img" src="../assets/search.png" class="p-0">
+          <select (change)="sortFiles()" [(ngModel)]="sortingMethod" class="form-select" aria-label="Default select example">
+            <option selected>Open this select menu</option>
+            <option value="name-asc">Name Ascending</option>
+            <option value="name-desc">Name Descending</option>
+            <option value="time-newest">Newest By Time</option>
+            <option value="time-oldest">Oldest By Time</option>
+          </select>
         </div>
       </div>
       <div class="dropdown action-dropdown">
