@@ -1,6 +1,7 @@
-import { Component, ChangeDetectorRef, IterableDiffers } from '@angular/core';
+import { Component } from '@angular/core';
 import { BackendService } from 'src/app/services/backend.service';
 import { File } from 'src/app/models/files';
+import { UserDetails } from 'src/app/models/UserDetails';
 import { FileUploader, FileItem } from 'ng2-file-upload';
 import { ModalTypes } from 'src/app/models/modals';
 
@@ -18,6 +19,9 @@ export class HomeComponent {
   uploader: FileUploader
   directoryNameToCreate: string = "sal"
   sortingMethod: string = "time-newest"
+  newFileName: string = ""
+  oldFilename: string = ""
+  userDetails: UserDetails = new UserDetails;
 
   constructor(private backend: BackendService) {
     this.refreshFiles()
@@ -29,6 +33,7 @@ export class HomeComponent {
 
     this.uploader.onBuildItemForm = (fileItem: FileItem, form: any) => {
       form.append('filename', `${this.currentPath}${fileItem._file.name}`);
+      form.append('size', this.getTotalFileSize())
     };
 
     this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
@@ -103,6 +108,18 @@ export class HomeComponent {
     this.selectedModal = ModalTypes.AddFiles
   }
 
+  onSettingsButton() {
+    this.backend.getDetails().subscribe(res => {
+      this.userDetails.Username = res.body!.username
+      this.userDetails.Max = res.body!.max
+      this.userDetails.Used = res.body!.used
+      console.log(this.userDetails)
+      this.selectedModal = ModalTypes.Settings
+    })
+    
+    
+  }
+
   onDirectoryCreate() {
     this.directoryNameToCreate = "sal"
     this.selectedModal = ModalTypes.Rename
@@ -120,24 +137,12 @@ export class HomeComponent {
     switch(this.sortingMethod) {
       case "name-asc":
         this.displayedFiles.sort(function (a, b) {
-          if (a.Name < b.Name) {
-            return -1;
-          }
-          if (a.Name > b.Name) {
-            return 1;
-          }
-          return 0;
+          return a.Name < b.Name ? -1 : 1;
         });
         break
       case "name-desc":
         this.displayedFiles.sort(function (a, b) {
-          if (a.Name < b.Name) {
-            return 1;
-          }
-          if (a.Name > b.Name) {
-            return -1;
-          }
-          return 0;
+          return a.Name < b.Name ? 1 : -1;
         });
         break
       case "time-newest":
@@ -152,5 +157,47 @@ export class HomeComponent {
         this.displayedFiles.sort((a, b) => b.CreatingTime - a.CreatingTime);
         break;
     }
+  }
+
+  onRenameButton(value: string) {
+    this.newFileName = this.currentPath + value
+    this.oldFilename = this.newFileName
+    this.selectedModal = ModalTypes.Rename
+  }
+
+  renameFile() {
+    if(this.newFileName[0] != "/") {
+      this.newFileName = "/" + this.newFileName
+    }
+    this.backend.renameFile(this.oldFilename, this.newFileName).subscribe(res => {
+      this.refreshFiles()
+    })
+  }
+
+  displayFileSize(fileItem: any): string {
+    if (fileItem.file) {
+      return this.formatFileSize(fileItem.file.size);
+    }
+    return '';
+  }
+
+  formatFileSize(size: number): string {
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let index = 0;
+    while (size >= 1024 && index < units.length - 1) {
+      size /= 1024;
+      index++;
+    }
+    return `${size.toFixed(2)} ${units[index]}`;
+  }
+
+  getTotalFileSize(): number {
+    let totalSize = 0;
+    this.uploader.queue.forEach((fileItem) => {
+      if (fileItem.file) {
+        totalSize += fileItem.file.size;
+      }
+    });
+    return totalSize;
   }
 }

@@ -14,6 +14,8 @@ export class FileComponent {
   @Output() downloadAttachmentEvent = new EventEmitter<string>();
   @Output() downloadInlineEvent = new EventEmitter<string>();
   @Output() downloadDirectoryEvent = new EventEmitter<string>();
+  @Output() renameFileEvent = new EventEmitter<string>();
+  @Output() moveFileEvent = new EventEmitter<string>();
 
   cd(value: string) {
     this.cdEvent.emit(value);
@@ -36,5 +38,13 @@ export class FileComponent {
 
   downloadInline(value: string) {
     this.downloadInlineEvent.emit(value);
+  }
+
+  renameFile(value: string) {
+    this.renameFileEvent.emit(value);
+  }
+
+  moveFile(value: string) {
+    this.moveFileEvent.emit(value);
   }
 }

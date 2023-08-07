@@ -26,12 +26,12 @@
             <input type="submit" value="Download" class="dropdown-item" (click)="downloadAttachment()">
         </li>
         <li>
-          <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <button type="button" (click)="renameFile(details.Name)" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
             Rename
           </button>
         </li>
         <li>
-          <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <button type="button" (click)="moveFile(details.Name)" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
             Move to
           </button>
         </li>

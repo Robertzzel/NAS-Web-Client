@@ -8,7 +8,7 @@
         <p class="text-center" id="path-text">{{currentPath}}</p>
       </div>
       <div class="app-menu">
-          <input type="image" src="../assets/menu.png" class="w-100 h-100 p-0" >
+          <input type="image" src="../assets/menu.png" (click)="onSettingsButton()" class="dropdown-item w-100 h-100 p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
       </div>
     </div>
     <div class="row action-bar">
@@ -46,7 +46,7 @@
         <app-file (cdEvent)="cd($event)" class="card card-file d-flex flex-column align-items-center mb-4"
           *ngFor="let file of displayedFiles" (removeEvent)="remove($event)"
           (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadAttachment($event)" [details]="file"
-          (downloadDirectoryEvent)="downloadDirectory($event)">
+          (downloadDirectoryEvent)="downloadDirectory($event)" (renameFileEvent)="onRenameButton($event)" (moveFileEvent)="onRenameButton($event)">
           
         </app-file>
     </div>
@@ -68,11 +68,30 @@
             <button type="button" class="btn btn-success btn-s"
                     (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
                 <span class="glyphicon glyphicon-upload"></span> Upload all
-            </button>  
+            </button>
+            <div *ngFor="let fileItem of uploader.queue">
+              <div>{{ fileItem.file.name }}&nbsp;{{ displayFileSize(fileItem) }}</div>
+            </div>
+            <div>Total size: &nbsp; {{ this.formatFileSize(getTotalFileSize())}}</div>
           </div>
           <div *ngSwitchCase="ModalTypes.Rename">
+            <label for="newname">New name</label>
+            <input [(ngModel)]="newFileName" id="newname" name="newname" type="text" placeholder="Directory Name"/><br/>
+            <button class="btn" (click)="renameFile()">Rename</button> 
+          </div>
+          <div *ngSwitchCase="ModalTypes.Move">
+            <label for="newname">New path</label>
+            <input [(ngModel)]="newFileName" id="newname" name="newname" type="text" placeholder="Directory Name"/><br/>
+            <button class="btn" (click)="renameFile()">Move</button> 
+          </div>
+          <div *ngSwitchCase="ModalTypes.CreateDir">
             <input type="text" [(ngModel)]="directoryNameToCreate" placeholder="Directory Name"/><br/>
             <button class="btn" (click)="createDir()">Create</button> 
+          </div>
+          <div *ngSwitchCase="ModalTypes.Settings">
+            <p>Username:</p> <p>{{userDetails.Username}}</p>
+            <p>Memory used:</p> <p> {{this.formatFileSize(userDetails.Used)}}</p>
+            <p>Max memory:</p> <p> {{this.formatFileSize(userDetails.Max)}}</p>
           </div>
         </div>
       </div>

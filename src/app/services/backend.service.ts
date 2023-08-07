@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { File } from 'src/app/models/files';
+import { UserDetails } from '../models/UserDetails';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,10 @@ export class BackendService {
     return this.httpClient.post<any>(this.baseUrl + "rm", {'path':path}, { withCredentials: true, observe: 'response' })
   }
 
+  renameFile(oldPath: string, newPath: string) {
+    return this.httpClient.post<any>(this.baseUrl + "rename", {'oldName': oldPath, "newName": newPath}, { withCredentials: true, observe: 'response' })
+  }
+
   createDirectory(path: string) {
     return this.httpClient.post<any>(this.baseUrl + "directory", {'path':path}, { withCredentials: true, observe: 'response' })
   }
@@ -40,5 +45,9 @@ export class BackendService {
 
   getLinkForUploadFile() {
     return `${this.baseUrl}upload`
+  }
+
+  getDetails() {
+    return this.httpClient.get<any>(this.baseUrl + "details", { withCredentials: true, observe: 'response' })
   }
 }
