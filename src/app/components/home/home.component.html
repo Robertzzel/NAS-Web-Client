@@ -1,5 +1,7 @@
 <div class="container-fluid d-flex flex-column w-100 h-100 m-2">
   <div class="d-flex flex-column h-10 w-100 justify-content-between m-1 mb-4 sticky-top top-bar">
+  <app-notification *ngIf="showAlert" [message]="alertMessage" [type]="notificationType"></app-notification>
+
     <div class="row d-flex flex-row mb-4">
       <div class="back-btn">
           <input type="image" src="../assets/back.png" (click)="cdup()" class="w-100 h-100 p-0" >
@@ -16,8 +18,7 @@
         <input type="text" placeholder="Search..." class="w-75 h-100 p-2" name="filter" [(ngModel)]="filter" (input)="displayFiles()">
         <div class="w-25 h-100 d-flex justify-content-center">
           <select (change)="sortFiles()" [(ngModel)]="sortingMethod" class="form-select" aria-label="Default select example">
-            <option selected>Open this select menu</option>
-            <option value="name-asc">Name Ascending</option>
+            <option selected value="name-asc">Name Ascending</option>
             <option value="name-desc">Name Descending</option>
             <option value="time-newest">Newest By Time</option>
             <option value="time-oldest">Oldest By Time</option>
@@ -89,9 +90,10 @@
             <button class="btn" (click)="createDir()">Create</button> 
           </div>
           <div *ngSwitchCase="ModalTypes.Settings">
-            <p>Username:</p> <p>{{userDetails.Username}}</p>
-            <p>Memory used:</p> <p> {{this.formatFileSize(userDetails.Used)}}</p>
-            <p>Max memory:</p> <p> {{this.formatFileSize(userDetails.Max)}}</p>
+            <p>Username: {{userDetails.Username}}</p>
+            <p>Memory used: {{this.formatFileSize(userDetails.Used)}}</p>
+            <p>Max memory: {{this.formatFileSize(userDetails.Max)}}</p>
+            <p>Remaining Memory: {{this.formatFileSize(userDetails.Max-userDetails.Used)}}</p>
           </div>
         </div>
       </div>

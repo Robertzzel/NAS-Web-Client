@@ -4,6 +4,7 @@ import { File } from 'src/app/models/files';
 import { UserDetails } from 'src/app/models/UserDetails';
 import { FileUploader, FileItem } from 'ng2-file-upload';
 import { ModalTypes } from 'src/app/models/modals';
+import { Notification } from 'src/app/models/notifications';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,9 @@ export class HomeComponent {
   newFileName: string = ""
   oldFilename: string = ""
   userDetails: UserDetails = new UserDetails;
+  showAlert: boolean = false;
+  alertMessage: string = '';
+  notificationType: string = "success"
 
   constructor(private backend: BackendService) {
     this.refreshFiles()
@@ -47,6 +51,17 @@ export class HomeComponent {
 
   remove(file: string) {
     this.backend.removeFile(this.currentPath + file).subscribe((res) => {
+      if(res.status == 200) {
+        this.displayAlert("Success", 2, Notification.Success)
+      } else if(res.status == 401) { // StatusUnauthorized
+
+      } else if(res.status == 500) { // internal error
+
+      } else if(res.status == 400) { // bad request
+
+      } else {
+
+      }
       this.refreshFiles()
     })
   }
@@ -84,8 +99,17 @@ export class HomeComponent {
   }
 
   refreshFiles() {
+    console.log("refreshing")
     this.backend.listFiles(this.currentPath).subscribe(res => {
-      if(res.status != 200) {
+      if(res.status == 200) {
+        this.displayAlert("Success", 2, Notification.Success)
+      } else if(res.status == 401) { // StatusUnauthorized
+        return
+      } else if(res.status == 500) { // internal error
+        return
+      } else if(res.status == 400) { // bad request
+        return
+      } else {
         return
       }
 
@@ -116,8 +140,6 @@ export class HomeComponent {
       console.log(this.userDetails)
       this.selectedModal = ModalTypes.Settings
     })
-    
-    
   }
 
   onDirectoryCreate() {
@@ -199,5 +221,29 @@ export class HomeComponent {
       }
     });
     return totalSize;
+  }
+
+  displayAlert(message: string, timeSeconds: number, type: Notification) {
+    this.showAlert = true;
+    this.alertMessage = message;
+    switch(type) {
+      case Notification.Success:
+        this.notificationType = "success"
+        break
+      case Notification.Info:
+        this.notificationType = "info"
+        break
+      case Notification.Warning:
+        this.notificationType = "warning"
+        break
+      case Notification.Danger:
+        this.notificationType = "danger"
+        break
+    }
+    setTimeout(() => {
+      this.showAlert = false;
+      this.alertMessage = '';
+    }, timeSeconds * 1000);
+    console.log("shown")
   }
 }

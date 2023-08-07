@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { HomeComponent } from './components/home/home.component';
 import { FileUploadModule } from 'ng2-file-upload';
 import { MdbCheckboxModule } from 'mdb-angular-ui-kit/checkbox';
+import { NotificationComponent } from './components/notification/notification.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { MdbCheckboxModule } from 'mdb-angular-ui-kit/checkbox';
     FileComponent,
     LoginComponent,
     HomeComponent,
+    NotificationComponent,
   ],
   imports: [
     BrowserModule,
