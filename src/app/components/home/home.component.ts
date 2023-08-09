@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { BackendService } from 'src/app/services/backend.service';
 import { File } from 'src/app/models/files';
 import { UserDetails } from 'src/app/models/UserDetails';
 import { FileUploader, FileItem } from 'ng2-file-upload';
 import { ModalTypes } from 'src/app/models/modals';
 import { Notification } from 'src/app/models/notifications';
+import { NotificationServiceService } from 'src/app/services/notification-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -23,11 +25,9 @@ export class HomeComponent {
   newFileName: string = ""
   oldFilename: string = ""
   userDetails: UserDetails = new UserDetails;
-  showAlert: boolean = false;
-  alertMessage: string = '';
-  notificationType: string = "success"
+  @Output() showAlertEvent = new EventEmitter<{ message: string, timeSeconds: number, type: Notification }>();
 
-  constructor(private backend: BackendService) {
+  constructor(private backend: BackendService, private notificationService: NotificationServiceService, private router: Router) {
     this.refreshFiles()
 
     this.uploader = new FileUploader({
@@ -49,18 +49,24 @@ export class HomeComponent {
     return ModalTypes; 
   }
 
+  displayAlert(message: string, timeSeconds: number, type: Notification) {
+    this.notificationService.displayAlert(message, timeSeconds, type);
+  }
+
   remove(file: string) {
     this.backend.removeFile(this.currentPath + file).subscribe((res) => {
       if(res.status == 200) {
-        this.displayAlert("Success", 2, Notification.Success)
+        this.displayAlert(`File ${this.currentPath + file} removed`, 2, Notification.Success)
       } else if(res.status == 401) { // StatusUnauthorized
-
+        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
+        this.router.navigate(['/'])
+        return
       } else if(res.status == 500) { // internal error
-
+        this.displayAlert(`Cannot remove file ${this.currentPath + file}, internal error`, 2, Notification.Warning)
       } else if(res.status == 400) { // bad request
-
+        this.displayAlert(`Cannot remove file ${this.currentPath + file}, bad request`, 2, Notification.Warning)
       } else {
-
+        this.displayAlert(`Cannot remove file ${this.currentPath + file}, unknown reason`, 2, Notification.Danger)
       }
       this.refreshFiles()
     })
@@ -99,24 +105,23 @@ export class HomeComponent {
   }
 
   refreshFiles() {
-    console.log("refreshing")
     this.backend.listFiles(this.currentPath).subscribe(res => {
-      if(res.status == 200) {
+        this.files = res.body!
+        this.filter = ""
+        this.displayFiles()
         this.displayAlert("Success", 2, Notification.Success)
-      } else if(res.status == 401) { // StatusUnauthorized
-        return
-      } else if(res.status == 500) { // internal error
-        return
-      } else if(res.status == 400) { // bad request
-        return
+    }, res => {
+      if(res.status === 401) { // StatusUnauthorized
+        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
+        this.router.navigate(['/'])
+      } else if(res.status === 500) { // internal error
+        this.displayAlert(`Cannot get files, internal error`, 2, Notification.Warning)
+      } else if(res.status === 400) { // bad request
+        this.displayAlert(`Cannot get files, bad request`, 2, Notification.Warning)
       } else {
-        return
+        this.displayAlert(`Cannot get files, unknown error`, 2, Notification.Warning)
       }
-
-      this.files = res.body!
-      this.filter = ""
-      this.displayFiles()
-    })
+    });
   }
 
   displayFiles() {
@@ -134,11 +139,23 @@ export class HomeComponent {
 
   onSettingsButton() {
     this.backend.getDetails().subscribe(res => {
-      this.userDetails.Username = res.body!.username
-      this.userDetails.Max = res.body!.max
-      this.userDetails.Used = res.body!.used
-      console.log(this.userDetails)
-      this.selectedModal = ModalTypes.Settings
+        this.displayAlert("Success", 2, Notification.Success)
+
+        this.userDetails.Username = res.body!.username
+        this.userDetails.Max = res.body!.max
+        this.userDetails.Used = res.body!.used
+        this.selectedModal = ModalTypes.Settings
+    }, res => {
+      if(res.status == 401) { // StatusUnauthorized
+        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
+        this.router.navigate(['/'])
+      } else if(res.status == 500) { // internal error
+        this.displayAlert(`Cannot get details, internal error`, 2, Notification.Warning)
+      } else if(res.status == 400) { // bad request
+        this.displayAlert(`Cannot get details, bad request`, 2, Notification.Warning)
+      } else {
+        this.displayAlert(`Cannot get details, unknown error`, 2, Notification.Warning)
+      }
     })
   }
 
@@ -192,7 +209,19 @@ export class HomeComponent {
       this.newFileName = "/" + this.newFileName
     }
     this.backend.renameFile(this.oldFilename, this.newFileName).subscribe(res => {
+      this.displayAlert("Success", 2, Notification.Success)
       this.refreshFiles()
+    }, res => {
+      if(res.status == 401) { // StatusUnauthorized
+        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
+        this.router.navigate(['/'])
+      } else if(res.status == 500) { // internal error
+        this.displayAlert(`Cannot rename file, internal error`, 2, Notification.Warning)
+      } else if(res.status == 400) { // bad request
+        this.displayAlert(`Cannot rename file, bad request`, 2, Notification.Warning)
+      } else {
+        this.displayAlert(`Cannot rename file, unknown error`, 2, Notification.Warning)
+      }
     })
   }
 
@@ -223,27 +252,21 @@ export class HomeComponent {
     return totalSize;
   }
 
-  displayAlert(message: string, timeSeconds: number, type: Notification) {
-    this.showAlert = true;
-    this.alertMessage = message;
-    switch(type) {
-      case Notification.Success:
-        this.notificationType = "success"
-        break
-      case Notification.Info:
-        this.notificationType = "info"
-        break
-      case Notification.Warning:
-        this.notificationType = "warning"
-        break
-      case Notification.Danger:
-        this.notificationType = "danger"
-        break
-    }
-    setTimeout(() => {
-      this.showAlert = false;
-      this.alertMessage = '';
-    }, timeSeconds * 1000);
-    console.log("shown")
+  uploadFiles() {
+    this.backend.getDetails().subscribe(res => {
+      this.userDetails.Username = res.body!.username
+      this.userDetails.Max = res.body!.max
+      this.userDetails.Used = res.body!.used
+      let remaining = this.userDetails.Max - this.userDetails.Used
+      if(this.getTotalFileSize() > remaining) {
+        this.displayAlert(`Not enough memory, only ${this.formatFileSize(remaining)} memory left`, 5, Notification.Warning)
+      } else {
+        this.uploader.uploadAll()
+        this.displayAlert("Success", 2, Notification.Success)
+      }
+    }, res => {
+      this.displayAlert(`Cannot upload`, 2, Notification.Warning)
+    })
+    
   }
 }

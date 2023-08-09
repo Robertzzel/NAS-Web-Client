@@ -1,7 +1,5 @@
 <div class="container-fluid d-flex flex-column w-100 h-100 m-2">
   <div class="d-flex flex-column h-10 w-100 justify-content-between m-1 mb-4 sticky-top top-bar">
-  <app-notification *ngIf="showAlert" [message]="alertMessage" [type]="notificationType"></app-notification>
-
     <div class="row d-flex flex-row mb-4">
       <div class="back-btn">
           <input type="image" src="../assets/back.png" (click)="cdup()" class="w-100 h-100 p-0" >
@@ -67,7 +65,7 @@
             <h3>Select files to upload</h3>
             <input type="file" ng2FileSelect [uploader]="uploader" multiple  /><br/>
             <button type="button" class="btn btn-success btn-s"
-                    (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
+                    (click)="uploadFiles()" [disabled]="!uploader.getNotUploadedItems().length">
                 <span class="glyphicon glyphicon-upload"></span> Upload all
             </button>
             <div *ngFor="let fileItem of uploader.queue">
