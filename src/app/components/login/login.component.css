@@ -1,0 +1,16 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 5rem;
+}
+
+.form-title {
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2rem;
+}
+
+.form button {
+    margin-top: 1.5rem;
+}
