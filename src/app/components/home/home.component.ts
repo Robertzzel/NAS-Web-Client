@@ -39,19 +39,14 @@ export class HomeComponent {
     this.uploader = new FileUploader({
       url: this.backend.getLinkForUploadFile(),
       parametersBeforeFiles: true,
-      headers: [{name: "Authentication", value: auth!}]
+      headers: [{name: "Authentication", value: auth!}],
+      disableMultipart: true,
     });
-    // disble coors on upload
 
-    this.uploader.onBeforeUploadItem = (item: { withCredentials: boolean; }) => {
-      item.withCredentials = false;
+    this.uploader.onBeforeUploadItem = (fileItem: FileItem ) => {
+      fileItem.withCredentials = false;
+      fileItem.url = `${this.backend.getLinkForUploadFile()}${this.currentPath}${fileItem._file.name}`
     }
-
-    this.uploader.onBuildItemForm = (fileItem: FileItem, form: any) => {
-      form.append('filename', `${this.currentPath}${fileItem._file.name}`);
-      form.append('size', this.getTotalFileSize())
-      form.append("Authentication", auth)
-    };
 
     this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
       this.refreshFiles()
