@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class BackendService {
-  baseUrl = "http://localhost:33334/api/"
+  baseUrl = "http://192.168.1.7:33334/api/"
   constructor(private httpClient: HttpClient, private cookieService: CookieService) { }
 
   getAuthHeaders(): HttpHeaders {

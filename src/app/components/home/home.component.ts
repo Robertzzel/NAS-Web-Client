@@ -51,6 +51,12 @@ export class HomeComponent {
     this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
       this.refreshFiles()
     };
+
+    this.uploader.onCompleteAll = () => {
+      while(this.uploader.queue.length > 0) {
+        this.uploader.queue.pop()
+      }
+    }
   }
 
   public get ModalTypes() {
@@ -188,7 +194,7 @@ export class HomeComponent {
 
   onDirectoryCreate() {
     this.directoryNameToCreate = "sal"
-    this.selectedModal = ModalTypes.Rename
+    this.selectedModal = ModalTypes.CreateDir
   }
 
   createDir() {
