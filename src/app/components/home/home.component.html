@@ -43,8 +43,8 @@
   <div class="d-flex flex-column h-90 w-100 files-view">
     <div class="row justify-content-around" id="files-card-view">
         <app-file (cdEvent)="cd($event)" class="card card-file d-flex flex-column align-items-center mb-4"
-          *ngFor="let file of displayedFiles" (removeEvent)="remove($event)"
-          (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadAttachment($event)" [details]="file"
+          *ngFor="let file of displayedFiles" (removeEvent)="removeFile($event)"
+          (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadFileAttachment($event)" [details]="file"
           (downloadDirectoryEvent)="downloadDirectory($event)" (renameFileEvent)="onRenameButton($event)" (moveFileEvent)="onRenameButton($event)">
           
         </app-file>

@@ -28,8 +28,6 @@ export class HomeComponent {
   @Output() showAlertEvent = new EventEmitter<{ message: string, timeSeconds: number, type: Notification }>();
 
   constructor(private backend: BackendService, private notificationService: NotificationServiceService, private router: Router) {
-    this.refreshFiles()
-
     const headers = this.backend.getAuthHeaders()
     const auth = headers.get("Authentication")
     if(auth === null) {
@@ -49,7 +47,7 @@ export class HomeComponent {
     }
 
     this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
-      this.refreshFiles()
+      this.uploader.queue = this.uploader.queue.filter(it => it.file.name !== item.file.name)
     };
 
     this.uploader.onCompleteAll = () => {
@@ -57,6 +55,8 @@ export class HomeComponent {
         this.uploader.queue.pop()
       }
     }
+
+    this.refreshFiles()
   }
 
   public get ModalTypes() {
@@ -67,27 +67,15 @@ export class HomeComponent {
     this.notificationService.displayAlert(message, timeSeconds, type);
   }
 
-  remove(file: string) {
+  removeFile(file: string) {
     this.backend.removeFile(this.currentPath + file).subscribe(res => {
-      if(res.status == 200) {
-        this.displayAlert(`File ${this.currentPath + file} removed`, 2, Notification.Success)
-      } else if(res.status == 401) { // StatusUnauthorized
-        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
-        this.router.navigate(['/'])
-        return
-      } else if(res.status == 500) { // internal error
-        this.displayAlert(`Cannot remove file ${this.currentPath + file}, internal error`, 2, Notification.Warning)
-      } else if(res.status == 400) { // bad request
-        this.displayAlert(`Cannot remove file ${this.currentPath + file}, bad request`, 2, Notification.Warning)
-      } else {
-        this.displayAlert(`Cannot remove file ${this.currentPath + file}, unknown reason`, 2, Notification.Danger)
-      }
+      this.displayAlert(`File ${this.currentPath + file} removed`, 2, Notification.Success)
       this.refreshFiles()
-    })
+    }, this.handleError)
   }
 
   downloadDirectory(file: string) {
-    const url = this.backend.getLinkDownloadDirectory(this.currentPath + file).subscribe(res => {
+    this.backend.getLinkDownloadDirectory(this.currentPath + file).subscribe(res => {
       const blobUrl = URL.createObjectURL(res);
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -99,8 +87,8 @@ export class HomeComponent {
     })
   }
 
-  downloadAttachment(file: string) {
-    const url = this.backend.getLinkDownloadAttachmentFile(this.currentPath + file).subscribe(res => {
+  downloadFileAttachment(file: string) {
+    this.backend.getLinkDownloadAttachmentFile(this.currentPath + file).subscribe(res => {
       const blobUrl = URL.createObjectURL(res);
       const a = document.createElement('a');
       a.href = blobUrl;
@@ -143,18 +131,7 @@ export class HomeComponent {
         this.filter = ""
         this.displayFiles()
         this.displayAlert("Success", 2, Notification.Success)
-    }, res => {
-      if(res.status === 401) { // StatusUnauthorized
-        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
-        this.router.navigate(['/'])
-      } else if(res.status === 500) { // internal error
-        this.displayAlert(`Cannot get files, internal error`, 2, Notification.Warning)
-      } else if(res.status === 400) { // bad request
-        this.displayAlert(`Cannot get files, bad request`, 2, Notification.Warning)
-      } else {
-        this.displayAlert(`Cannot get files, unknown error`, 2, Notification.Warning)
-      }
-    });
+    }, this.handleError);
   }
 
   displayFiles() {
@@ -178,18 +155,7 @@ export class HomeComponent {
         this.userDetails.Max = res.body!.max
         this.userDetails.Used = res.body!.used
         this.selectedModal = ModalTypes.Settings
-    }, res => {
-      if(res.status == 401) { // StatusUnauthorized
-        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
-        this.router.navigate(['/'])
-      } else if(res.status == 500) { // internal error
-        this.displayAlert(`Cannot get details, internal error`, 2, Notification.Warning)
-      } else if(res.status == 400) { // bad request
-        this.displayAlert(`Cannot get details, bad request`, 2, Notification.Warning)
-      } else {
-        this.displayAlert(`Cannot get details, unknown error`, 2, Notification.Warning)
-      }
-    })
+    }, this.handleError)
   }
 
   onDirectoryCreate() {
@@ -244,18 +210,7 @@ export class HomeComponent {
     this.backend.renameFile(this.oldFilename, this.newFileName).subscribe(res => {
       this.displayAlert("Success", 2, Notification.Success)
       this.refreshFiles()
-    }, res => {
-      if(res.status == 401) { // StatusUnauthorized
-        this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
-        this.router.navigate(['/'])
-      } else if(res.status == 500) { // internal error
-        this.displayAlert(`Cannot rename file, internal error`, 2, Notification.Warning)
-      } else if(res.status == 400) { // bad request
-        this.displayAlert(`Cannot rename file, bad request`, 2, Notification.Warning)
-      } else {
-        this.displayAlert(`Cannot rename file, unknown error`, 2, Notification.Warning)
-      }
-    })
+    }, this.handleError)
   }
 
   displayFileSize(fileItem: any): string {
@@ -301,5 +256,26 @@ export class HomeComponent {
       this.displayAlert(`Cannot upload`, 2, Notification.Warning)
     })
     
+  }
+
+  handleError(
+    res: any,
+    unauthorizedHandler = () => {this.router.navigate(['/'])},
+    internalErrorHandler = () => {},
+    badRequestHandler = () => {},
+    unknownErrorHandler = () => {},) {
+    if(res.status == 401) {
+      this.displayAlert(`You are not loggedd in`, 2, Notification.Warning)
+      unauthorizedHandler()
+    } else if(res.status == 500) {
+      this.displayAlert(`Internal error`, 2, Notification.Warning)
+      internalErrorHandler()
+    } else if(res.status == 400) {
+      this.displayAlert(`Bad request`, 2, Notification.Warning)
+      badRequestHandler()
+    } else {
+      this.displayAlert(`Unknown error`, 2, Notification.Warning)
+      unknownErrorHandler()
+    }
   }
 }
