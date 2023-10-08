@@ -4,5 +4,4 @@ export enum ModalTypes {
     Rename,
     Move,
     Settings,
-    DisplayInline,
 }

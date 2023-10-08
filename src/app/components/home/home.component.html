@@ -8,7 +8,7 @@
         <p class="text-center" id="path-text">{{currentPath}}</p>
       </div>
       <div class="app-menu">
-          <input type="image" src="../assets/menu.png" (click)="onSettingsButton()" class="dropdown-item w-100 h-100 p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <input type="image" src="../assets/menu.png" (click)="this.modal?.onSettingsModalPressed()" class="dropdown-item w-100 h-100 p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
       </div>
     </div>
     <div class="row action-bar">
@@ -27,12 +27,12 @@
         <img class="dropdown-toggle btn" src="../assets/plus.png" data-bs-toggle="dropdown" aria-expanded="false">
         <ul class="dropdown-menu">
           <li>
-            <button (click)="onFilesAdd()" type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button (click)="this.modal?.onAddFilesModalPressed()" type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
               Add files
             </button>
           </li>
           <li>
-            <button (click)="onDirectoryCreate()" type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button (click)="this.modal?.onCreateDirModalPressed()" type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
               Create directory
             </button>
           </li>
@@ -45,56 +45,11 @@
         <app-file (cdEvent)="cd($event)" class="card card-file d-flex flex-column align-items-center mb-4"
           *ngFor="let file of displayedFiles" (removeEvent)="removeFile($event)"
           (downloadInlineEvent)="downloadInline($event)" (downloadAttachmentEvent)="downloadFileAttachment($event)" [details]="file"
-          (downloadDirectoryEvent)="downloadDirectory($event)" (renameFileEvent)="onRenameButton($event)" (moveFileEvent)="onRenameButton($event)">
+          (downloadDirectoryEvent)="downloadDirectory($event)" (renameFileEvent)="this.modal?.onRenameModalPressed($event)" (moveFileEvent)="this.modal?.onMoveModalPressed($event)">
           
         </app-file>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel" ></h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div [ngSwitch]="selectedModal">
-          <div *ngSwitchCase="ModalTypes.AddFiles">
-            <h3>Select files to upload</h3>
-            <input type="file" ng2FileSelect [uploader]="uploader" multiple  /><br/>
-            <button type="button" class="btn btn-success btn-s"
-                    (click)="uploadFiles()" [disabled]="!uploader.getNotUploadedItems().length">
-                <span class="glyphicon glyphicon-upload"></span> Upload all
-            </button>
-            <div *ngFor="let fileItem of uploader.queue">
-              <div>{{ fileItem.file.name }}&nbsp;{{ displayFileSize(fileItem) }}</div>
-            </div>
-            <div>Total size: &nbsp; {{ this.formatFileSize(getTotalFileSize())}}</div>
-          </div>
-          <div *ngSwitchCase="ModalTypes.Rename">
-            <label for="newname">New name</label>
-            <input [(ngModel)]="newFileName" id="newname" name="newname" type="text" placeholder="Directory Name"/><br/>
-            <button class="btn" (click)="renameFile()">Rename</button> 
-          </div>
-          <div *ngSwitchCase="ModalTypes.Move">
-            <label for="newname">New path</label>
-            <input [(ngModel)]="newFileName" id="newname" name="newname" type="text" placeholder="Directory Name"/><br/>
-            <button class="btn" (click)="renameFile()">Move</button> 
-          </div>
-          <div *ngSwitchCase="ModalTypes.CreateDir">
-            <input type="text" [(ngModel)]="directoryNameToCreate" placeholder="Directory Name"/><br/>
-            <button class="btn" (click)="createDir()">Create</button> 
-          </div>
-          <div *ngSwitchCase="ModalTypes.Settings">
-            <p>Username: {{userDetails.Username}}</p>
-            <p>Memory used: {{this.formatFileSize(userDetails.Used)}}</p>
-            <p>Max memory: {{this.formatFileSize(userDetails.Max)}}</p>
-            <p>Remaining Memory: {{this.formatFileSize(userDetails.Max-userDetails.Used)}}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<app-modal [currentPath]="this.currentPath"></app-modal>

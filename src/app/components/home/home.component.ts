@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, OnInit } from '@angular/core';
 import { BackendService } from 'src/app/services/backend.service';
 import { File } from 'src/app/models/files';
 import { UserDetails } from 'src/app/models/UserDetails';
@@ -7,60 +7,28 @@ import { ModalTypes } from 'src/app/models/modals';
 import { Notification } from 'src/app/models/notifications';
 import { NotificationServiceService } from 'src/app/services/notification-service.service';
 import { Router } from '@angular/router';
+import { ModalComponent } from './modal/modal.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit{
   files: File[] = []
   displayedFiles: File[] = []
   filter: string = ""
   currentPath: string = "/"
   selectedModal: ModalTypes = ModalTypes.AddFiles
-  uploader: FileUploader
-  directoryNameToCreate: string = "sal"
   sortingMethod: string = "time-newest"
-  newFileName: string = ""
-  oldFilename: string = ""
-  userDetails: UserDetails = new UserDetails;
+  
   @Output() showAlertEvent = new EventEmitter<{ message: string, timeSeconds: number, type: Notification }>();
+  @ViewChild(ModalComponent, {static : true}) modal : ModalComponent | undefined;
 
-  constructor(private backend: BackendService, private notificationService: NotificationServiceService, private router: Router) {
-    const headers = this.backend.getAuthHeaders()
-    const auth = headers.get("Authentication")
-    if(auth === null) {
-      this.router.navigate(["login"])
-    }
+  constructor(private backend: BackendService, private notificationService: NotificationServiceService, private router: Router) {}
 
-    this.uploader = new FileUploader({
-      url: this.backend.getLinkForUploadFile(),
-      parametersBeforeFiles: true,
-      headers: [{name: "Authentication", value: auth!}],
-      disableMultipart: true,
-    });
-
-    this.uploader.onBeforeUploadItem = (fileItem: FileItem ) => {
-      fileItem.withCredentials = false;
-      fileItem.url = `${this.backend.getLinkForUploadFile()}${this.currentPath}${fileItem._file.name}`
-    }
-
-    this.uploader.onCompleteItem = (item: FileItem, response: string, status: number) => {
-      this.uploader.queue = this.uploader.queue.filter(it => it.file.name !== item.file.name)
-    };
-
-    this.uploader.onCompleteAll = () => {
-      while(this.uploader.queue.length > 0) {
-        this.uploader.queue.pop()
-      }
-    }
-
+  ngOnInit() {
     this.refreshFiles()
-  }
-
-  public get ModalTypes() {
-    return ModalTypes; 
   }
 
   displayAlert(message: string, timeSeconds: number, type: Notification) {
@@ -79,7 +47,7 @@ export class HomeComponent {
       const blobUrl = URL.createObjectURL(res);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = ''; // Leave the download attribute empty to use the default filename
+      a.download = file;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
@@ -92,7 +60,7 @@ export class HomeComponent {
       const blobUrl = URL.createObjectURL(res);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = ''; // Leave the download attribute empty to use the default filename
+      a.download = '';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(blobUrl);
@@ -143,33 +111,6 @@ export class HomeComponent {
     this.sortFiles()
   }
 
-  onFilesAdd() {
-    this.selectedModal = ModalTypes.AddFiles
-  }
-
-  onSettingsButton() {
-    this.backend.getDetails().subscribe(res => {
-        this.displayAlert("Success", 2, Notification.Success)
-
-        this.userDetails.Username = res.body!.username
-        this.userDetails.Max = res.body!.max
-        this.userDetails.Used = res.body!.used
-        this.selectedModal = ModalTypes.Settings
-    }, this.handleError)
-  }
-
-  onDirectoryCreate() {
-    this.directoryNameToCreate = "sal"
-    this.selectedModal = ModalTypes.CreateDir
-  }
-
-  createDir() {
-    console.log("creating", this.currentPath + this.directoryNameToCreate)
-    this.backend.createDirectory(this.currentPath + this.directoryNameToCreate).subscribe(res => {
-      this.refreshFiles()
-    })
-  }
-
   sortFiles() {
     console.log(this.sortingMethod)
     switch(this.sortingMethod) {
@@ -197,65 +138,9 @@ export class HomeComponent {
     }
   }
 
-  onRenameButton(value: string) {
-    this.newFileName = this.currentPath + value
-    this.oldFilename = this.newFileName
-    this.selectedModal = ModalTypes.Rename
-  }
-
   renameFile() {
-    if(this.newFileName[0] != "/") {
-      this.newFileName = "/" + this.newFileName
-    }
-    this.backend.renameFile(this.oldFilename, this.newFileName).subscribe(res => {
-      this.displayAlert("Success", 2, Notification.Success)
-      this.refreshFiles()
-    }, this.handleError)
-  }
-
-  displayFileSize(fileItem: any): string {
-    if (fileItem.file) {
-      return this.formatFileSize(fileItem.file.size);
-    }
-    return '';
-  }
-
-  formatFileSize(size: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let index = 0;
-    while (size >= 1024 && index < units.length - 1) {
-      size /= 1024;
-      index++;
-    }
-    return `${size.toFixed(2)} ${units[index]}`;
-  }
-
-  getTotalFileSize(): number {
-    let totalSize = 0;
-    this.uploader.queue.forEach((fileItem) => {
-      if (fileItem.file) {
-        totalSize += fileItem.file.size;
-      }
-    });
-    return totalSize;
-  }
-
-  uploadFiles() {
-    this.backend.getDetails().subscribe(res => {
-      this.userDetails.Username = res.body!.username
-      this.userDetails.Max = res.body!.max
-      this.userDetails.Used = res.body!.used
-      let remaining = this.userDetails.Max - this.userDetails.Used
-      if(this.getTotalFileSize() > remaining) {
-        this.displayAlert(`Not enough memory, only ${this.formatFileSize(remaining)} memory left`, 5, Notification.Warning)
-      } else {
-        this.uploader.uploadAll()
-        this.displayAlert("Success", 2, Notification.Success)
-      }
-    }, res => {
-      this.displayAlert(`Cannot upload`, 2, Notification.Warning)
-    })
-    
+    this.modal?.renameFile()
+    this.refreshFiles()
   }
 
   handleError(
